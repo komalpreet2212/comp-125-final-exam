@@ -3,140 +3,256 @@
     function Start() {
         console.log(`%c App Started...`,"color:blue; font-size: 30px; font-weight:bold;");
        // Your Code goes here
-       (function(){
-        "Use Strict"
-    
-        function AboutButtonClick() {
-            console.log("About Button was Clicked!");
-        }
-    
-        function AboutButtonOver(event) {
-            event.currentTarget.style.opacity = 0.3;
-        }
-    
-        function AboutButtonOut() {
-            event.currentTarget.style.opacity = 1.0;
-        }
-    
-    function HomeContent() {
-        let AboutButton = document.getElementById("AboutButton");
-    
-        AboutButton.innerText = "About";
-    
-            AboutButton.addEventListener("click", AboutButtonClick);
-            AboutButton.addEventListener("mouseover", AboutButtonOver);
-            AboutButton.addEventListener("mouseout", AboutButtonOut);
-    
-    }
-    function text() {
-        let text = document.getElementById("text");
-    
-        text.textContent = "This Website belongs to Komalpreet Kaur, I born and brought up in Lohian Khas, Punjab, India on 22 Dec 1998. I am very Recognized about my Studies. I am very Soft and Delighted. I am very open-minded and let to enjoy life. I don't want anyone to rip me of from my life and my freedom. I am very Emotional in terms of relations. I am very soft but sometimes I think stone-heart is better for some people. ";
-    }
-    function h3() {
-        let h3 = document.getElementById("h3");
-    
-        h3.textContent = " MY GOAL ";
-    }
-    function h32() {
-        let h32 = document.getElementById("h32");
-    
-        h32.textContent = " Hobbies: ";
-    }
-    
-    
-    function Start() {
-        // local variable
-        let title = document.title;
-    
-        switch(title) {
-            case "HomePage":            
-                HomeContent();
-                footer();
-                break;
-    
-                case "About page":
-                text();
-                h3();
-                h32();
-                break;
-    
-                case "ContactPage":
-                footer();
-                break;
-    
-                default:
-                break;
-        }
-                     
-    
-        console.log("App Started!");
-        console.log("------------------");
-        console.log("Title: "+ title);
-    }
-    
-    window.onload = Start;
-    
-    })();
-    
-    
-    
-    function validateForm() {
-        var elements = document.getElementsByTagName("input");
-        for (var i = 0; i < elements.length; i++) {
-            if(elements[i].value == "") {
-                alert(elements[i].name + ' is required.');
-                return false;
+        // App variables
+        let XHR;
+        let hash;
+        let addressBook;
+        let Contacts;
+        let paragraphs;
+        let skills;
+      
+      
+        /**
+         * This function inserts HTML from a file or other location
+         * into the specificied tag / element that exists on the 
+         * index.html page
+         *
+         * @param {string} sourceURL
+         * @param {string} destTag
+         */
+        function insertHTML(sourceURL, destTag) {
+         let target = document.querySelector(destTag);
+      
+          XHR = new XMLHttpRequest();
+          XHR.addEventListener("readystatechange", function(){
+            if(this.status === 200) {
+              if(this.readyState === 4)  {
+                target.innerHTML = this.responseText;
+                setActiveNavLink();
+      
+                if(document.title == "Contact") {
+                  loadJSON();
+                }
+              }
             }
+          });
+          XHR.open("GET", sourceURL);
+          XHR.send();
         }
-        var postalCode = elements["Postal Code"].value.toUpperCase();
-        var regularExpression = /^[ABCEGHJKLMNPRSTVXY]\d[ABCEGHJKLMNPRSTVWXYZ] ?\d[ABCEGHJKLMNPRSTVWXYZ]\d$/;
-        if (!postalCode.match(regularExpression)) {
-            alert("Please enter a valid Postal Code!");
-            return false;
+      
+        /**
+         * This function loads a JSON file and dumps it into the addressbook container
+         *
+         */
+        function loadJSON() {
+          
+          XHR = new XMLHttpRequest();
+          XHR.addEventListener("readystatechange", function(){
+            if(this.status === 200) {
+              if(this.readyState === 4)  {
+                addressBook = JSON.parse(this.responseText);
+                console.log("Data finished loading");
+      
+                createContacts();
+      
+                displayData();
+              }
+            }
+          });
+          XHR.open("GET", "/data.json");
+          XHR.send();
         }
-        else {
-            elements["Postal Code"].value = postalCode;
-        }    
-        var province = document.getElementById("province").value.toUpperCase();
-        if (!verifyProvince(province)) {
-            alert("Please enter a valid Canadian Province (NS, NF, PE, NB, QC, ON, MN, SK, AB, BC).");
-            return false;
+      
+        function loadParagraphs() {
+          
+          XHR = new XMLHttpRequest();
+          XHR.addEventListener("readystatechange", function(){
+            if(this.status === 200) {
+              if(this.readyState === 4)  {
+                paragraphs = JSON.parse(this.responseText);
+                console.log("Paragraph Data finished loading");
+      
+                console.log(paragraphs);
+      
+                for (const property in paragraphs) {
+                  if (paragraphs.hasOwnProperty(property)) {
+                    console.log(paragraphs[property]);
+                    
+                  }
+                }
+      
+                console.log(`Paragraph3: ${paragraphs.paragraph3}`);
+              }
+            }
+          });
+          XHR.open("GET", "/paragraphs.json");
+          XHR.send();
         }
-        else {
-            document.getElementById("province").value = province;
+      
+        function loadSkills() {
+          
+          XHR = new XMLHttpRequest();
+          XHR.addEventListener("readystatechange", function(){
+            if(this.status === 200) {
+              if(this.readyState === 4)  {
+                skills = JSON.parse(this.responseText);
+                console.log("Skill Data finished loading");
+      
+                console.log(skills);
+      
+                for (const property in skills) {
+                  if (skills.hasOwnProperty(property)) {
+                    console.log(skills[property]);
+                    
+                  }
+                }
+      
+                console.log(`Skill1 name: ${skills.skill1.name}`);
+                console.log(`Skill1 details: ${skills.skill1.details}`);
+              }
+            }
+          });
+          XHR.open("GET", "/skills.json");
+          XHR.send();
         }
-        var age = elements["Age"];
-        if (age.value < 18) {
-            alert("Sorry, but you must be at least 18 years old to submit this form.");
-            return false;
+      
+        function createContacts() {
+          addressBook.Contacts.forEach(contact => {
+            let newContact = new objects.Contact(
+              contact.id, contact.name, contact.number, contact.email);
+            Contacts.push(newContact);
+          });
         }
-        var pass = elements["Password"].value;
-        var confirmPass = elements["Confirm Password"].value;
-        if (pass != confirmPass) {
-            alert("Passwords don't match.")
-            return false;
+      
+      
+        function displayData() {
+      
+            let tbody = document.querySelector("tbody");
+            tbody.innerHTML = "";
+      
+            Contacts.forEach(contact => {
+      
+              let tr = document.createElement("tr");
+              let th = document.createElement("th");
+              th.setAttribute("scope", "row");
+              th.textContent = contact.id;
+              tr.appendChild(th);
+      
+              // loop through each property of the contact object
+              // then add the property value to the column
+              for (const property in contact) {
+                if (contact.hasOwnProperty(property)) {           
+                  if(property != "id") {
+                    let td = document.createElement("td");
+                    td.textContent = contact[property];
+                    tr.appendChild(td);
+                  }
+                }
+              }
+              
+              let editTd = document.createElement("td");
+              let editButton = document.createElement("button");
+              editButton.setAttribute("class", "btn btn-primary btn-sm");
+              editButton.setAttribute("data-id", contact.id);
+              editButton.innerHTML = "<i class='fa fa-edit fa-lg'></i> Edit";
+              editTd.appendChild(editButton);
+              tr.appendChild(editTd);
+      
+              editButton.addEventListener("click", (event)=>{
+                let id = event.currentTarget.getAttribute("data-id");
+                console.log(`Editing Item: ${id}`);
+              });
+      
+      
+              let deleteTd = document.createElement("td");
+              let deleteButton = document.createElement("button");
+              deleteButton.setAttribute("class", "btn btn-danger btn-sm");
+              deleteButton.setAttribute("data-id", contact.id);
+              deleteButton.innerHTML = "<i class='fa fa-trash fa-lg'></i> Delete";
+              deleteTd.appendChild(deleteButton);
+              tr.appendChild(deleteTd);
+      
+              deleteButton.addEventListener("click", (event)=>{
+                let id = event.currentTarget.getAttribute("data-id");
+                console.log(`Deleting Item: ${id}`);
+      
+                let contactToDelete = Contacts.find(function(contact){
+                  return contact.id == id;
+                });
+      
+                Contacts.splice(Contacts.indexOf(contactToDelete), 1);
+      
+                displayData();
+              });
+      
+      
+      
+                tbody.appendChild(tr);
+            });
+        
         }
-        if (!pass.match(/[A-Z]/) || !pass.match(/[0-9]/) || pass.length < 6) {
-            alert("Your password must contain at least 6 characters, one upper-case character and one digit.");
-            return false;
+      
+      
+        /**
+         * This function is used for Intialization
+         */
+        function Start() {
+          console.log(
+            `%c App Initializing...`,
+            "font-weight: bold; font-size: 20px;"
+          );
+      
+          Contacts = [];
+      
+          Main();
         }
-        var email = elements["Email"].value
-        if (!email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
-            alert("Please enter a valid e-mail.");
-            return false;
+      
+        /**
+         * This function is the where the main functionality for our
+         * web app is happening
+         */
+        function Main() {
+          console.log(`%c App Started...`, "font-weight: bold; font-size: 20px;");
+          
+          insertHTML("/Views/partials/header.html", "header");
+      
+          setPageContent("/Views/content/home.html");
+      
+          insertHTML("/Views/partials/footer.html", "footer");
+      
+          loadParagraphs();
+      
+          loadSkills();
         }
-        alert("Thanks for registering with our website, your customer record was created successfully.");
-        document.forms[0].reset();
-        return false;
-    }
-    
-    function verifyProvince(value) {
-        var provinces = ['NS', 'NF', 'PE', 'NB', 'QC', 'ON', 'MN', 'SK', 'AB', 'BC'];
-        return provinces.includes(value);
-    }
-    
+      
+        function setPageContent(url) {
+          insertHTML(url, "main");
+        }
+      
+        function Route() {
+          // sanitize the url - remove the #
+          hash = location.hash.slice(1);
+      
+          document.title = hash;
+      
+          // change the URL of my page
+          history.pushState("", document.title, "/" + hash.toLowerCase() + "/");
+      
+          setPageContent("/Views/content/" + hash.toLowerCase() + ".html")
+        }
+      
+        function setActiveNavLink() {
+          // clears the "active" class from each of the list items in the navigation
+          document.querySelectorAll("li.nav-item").forEach(function(listItem){
+            listItem.setAttribute("class", "nav-item");
+          });
+      
+          // add the "active" class to the class attribute of the appropriate list item
+          document.getElementById(document.title).classList.add("active");
+      
+        }
     }
 
     window.addEventListener("load", Start);
+    window.addEventListener("hashchange", Route);
 })();
